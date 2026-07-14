@@ -1,0 +1,710 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Task Manager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --primary: #2563eb;
+        --primary-hover: #1d4ed8;
+        --primary-soft: rgba(37, 99, 235, 0.10);
+        --accent: #06b6d4;
+        --success: #16a34a;
+        --success-soft: rgba(22, 163, 74, 0.12);
+        --error: #dc2626;
+        --error-soft: rgba(220, 38, 38, 0.10);
+        --bg: #f1f5f9;
+        --surface: #ffffff;
+        --surface-2: #f8fafc;
+        --border: #e2e8f0;
+        --border-strong: #cbd5e1;
+        --text: #0f172a;
+        --text-muted: #64748b;
+        --text-faint: #94a3b8;
+        --radius-sm: 8px;
+        --radius: 14px;
+        --radius-lg: 20px;
+        --shadow-lg: 0 20px 50px rgba(15, 23, 42, 0.10), 0 8px 16px rgba(15, 23, 42, 0.05);
+        --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      html { -webkit-text-size-adjust: 100%; }
+
+      body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: var(--bg);
+        background-image:
+          radial-gradient(circle at 15% 0%, rgba(37, 99, 235, 0.08), transparent 45%),
+          radial-gradient(circle at 85% 100%, rgba(6, 182, 212, 0.08), transparent 45%);
+        color: var(--text);
+        min-height: 100vh;
+        line-height: 1.5;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 48px 20px;
+      }
+
+      .app {
+        width: 100%;
+        max-width: 560px;
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+        animation: app-in 500ms cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+
+      @keyframes app-in {
+        from { opacity: 0; transform: translateY(24px) scale(0.98); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+      }
+
+      /* Header */
+      .app__header {
+        padding: 32px 32px 24px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        color: #fff;
+      }
+
+      .app__brand {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .app__logo {
+        display: grid;
+        place-items: center;
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.18);
+        color: #fff;
+        flex-shrink: 0;
+      }
+
+      .app__title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+      }
+
+      .app__subtitle {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.85);
+        margin-top: 2px;
+      }
+
+      /* Form */
+      .task-form {
+        display: flex;
+        gap: 12px;
+        padding: 24px 32px 8px;
+      }
+
+      .task-form__input-wrap {
+        position: relative;
+        flex: 1;
+      }
+
+      .task-form__icon {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-faint);
+        pointer-events: none;
+        transition: color var(--transition);
+      }
+
+      .task-form__input {
+        width: 100%;
+        height: 48px;
+        padding: 0 16px 0 46px;
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--surface-2);
+        font-family: inherit;
+        font-size: 0.95rem;
+        color: var(--text);
+        transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+      }
+
+      .task-form__input::placeholder { color: var(--text-faint); }
+
+      .task-form__input:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: var(--surface);
+        box-shadow: 0 0 0 4px var(--primary-soft);
+      }
+
+      .task-form__btn {
+        height: 48px;
+        padding: 0 22px;
+        border: none;
+        border-radius: var(--radius);
+        background: var(--primary);
+        color: #fff;
+        font-family: inherit;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: background var(--transition), transform var(--transition), box-shadow var(--transition);
+      }
+
+      .task-form__btn:hover {
+        background: var(--primary-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px var(--primary-soft);
+      }
+
+      .task-form__btn:active { transform: translateY(0); }
+
+      /* Filters */
+      .filters {
+        display: flex;
+        gap: 6px;
+        padding: 12px 32px 16px;
+      }
+
+      .filter {
+        flex: 1;
+        padding: 9px 12px;
+        border: none;
+        border-radius: var(--radius-sm);
+        background: transparent;
+        color: var(--text-muted);
+        font-family: inherit;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background var(--transition), color var(--transition);
+      }
+
+      .filter:hover { background: var(--surface-2); color: var(--text); }
+
+      .filter.is-active {
+        background: var(--primary-soft);
+        color: var(--primary);
+      }
+
+      /* Task list */
+      .task-list {
+        list-style: none;
+        padding: 0 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-height: 52vh;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: var(--border-strong) transparent;
+      }
+
+      .task-list::-webkit-scrollbar { width: 6px; }
+      .task-list::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+      .task-list::-webkit-scrollbar-track { background: transparent; }
+
+      /* Task item */
+      .task-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 16px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        animation: task-in 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+        transition: border-color var(--transition), background var(--transition);
+      }
+
+      @keyframes task-in {
+        from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+      }
+
+      .task-item.is-removing {
+        animation: task-out 280ms cubic-bezier(0.4, 0, 1, 1) forwards;
+      }
+
+      @keyframes task-out {
+        to {
+          opacity: 0;
+          transform: translateX(24px) scale(0.95);
+          max-height: 0;
+          margin-top: -8px;
+          padding-top: 0;
+          padding-bottom: 0;
+          border-width: 0;
+        }
+      }
+
+      .task-item:hover { border-color: var(--border-strong); }
+      .task-item.is-completed { background: var(--surface-2); }
+
+      /* Checkbox */
+      .task-item__checkbox {
+        position: relative;
+        width: 24px;
+        height: 24px;
+        flex-shrink: 0;
+        cursor: pointer;
+      }
+
+      .task-item__checkbox input {
+        position: absolute;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+      }
+
+      .task-item__checkmark {
+        position: absolute;
+        inset: 0;
+        border: 2px solid var(--border-strong);
+        border-radius: 8px;
+        background: var(--surface);
+        transition: border-color var(--transition), background var(--transition);
+        display: grid;
+        place-items: center;
+      }
+
+      .task-item__checkmark svg {
+        width: 14px;
+        height: 14px;
+        stroke: #fff;
+        stroke-width: 3;
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-dasharray: 20;
+        stroke-dashoffset: 20;
+        transition: stroke-dashoffset var(--transition) 60ms;
+      }
+
+      .task-item__checkbox input:checked + .task-item__checkmark {
+        border-color: var(--success);
+        background: var(--success);
+      }
+
+      .task-item__checkbox input:checked + .task-item__checkmark svg {
+        stroke-dashoffset: 0;
+      }
+
+      .task-item__checkbox:hover .task-item__checkmark { border-color: var(--success); }
+
+      /* Text */
+      .task-item__text {
+        flex: 1;
+        font-size: 0.95rem;
+        color: var(--text);
+        word-break: break-word;
+        transition: color var(--transition), opacity var(--transition);
+      }
+
+      .task-item.is-completed .task-item__text {
+        color: var(--text-faint);
+        text-decoration: line-through;
+        text-decoration-thickness: 1.5px;
+      }
+
+      /* Delete button */
+      .task-item__delete {
+        display: grid;
+        place-items: center;
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: 8px;
+        background: transparent;
+        color: var(--text-faint);
+        cursor: pointer;
+        flex-shrink: 0;
+        opacity: 0;
+        transition: opacity var(--transition), background var(--transition), color var(--transition);
+      }
+
+      .task-item:hover .task-item__delete,
+      .task-item:focus-within .task-item__delete { opacity: 1; }
+
+      .task-item__delete:hover {
+        background: var(--error-soft);
+        color: var(--error);
+      }
+
+      .task-item__delete svg { width: 18px; height: 18px; }
+
+      /* Empty state */
+      .empty-state {
+        padding: 48px 32px 56px;
+        text-align: center;
+        color: var(--text-faint);
+        animation: fade-in 300ms ease both;
+      }
+
+      @keyframes fade-in {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+      }
+
+      .empty-state__icon {
+        display: inline-grid;
+        place-items: center;
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: var(--primary-soft);
+        color: var(--primary);
+        margin-bottom: 14px;
+      }
+
+      .empty-state__text { font-size: 0.95rem; font-weight: 500; }
+
+      /* Footer */
+      .app__footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 18px 24px;
+        border-top: 1px solid var(--border);
+        background: var(--surface-2);
+      }
+
+      .app__footer-count {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: var(--text-muted);
+      }
+
+      .app__clear-btn {
+        padding: 8px 14px;
+        border: none;
+        border-radius: var(--radius-sm);
+        background: transparent;
+        color: var(--error);
+        font-family: inherit;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background var(--transition);
+      }
+
+      .app__clear-btn:hover { background: var(--error-soft); }
+      .app__clear-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+      /* Toast */
+      .toast {
+        position: fixed;
+        bottom: 28px;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        padding: 12px 20px;
+        background: var(--text);
+        color: #fff;
+        border-radius: var(--radius);
+        font-size: 0.875rem;
+        font-weight: 500;
+        box-shadow: var(--shadow-lg);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity var(--transition), transform var(--transition);
+        z-index: 100;
+      }
+
+      .toast.is-visible {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      /* Responsive */
+      @media (max-width: 600px) {
+        body { padding: 16px; align-items: stretch; }
+        .app { border-radius: var(--radius); }
+        .app__header { padding: 24px 20px 20px; }
+        .app__title { font-size: 1.25rem; }
+        .task-form { padding: 20px 20px 8px; gap: 10px; }
+        .task-form__btn { padding: 0 16px; }
+        .filters { padding: 10px 20px 12px; }
+        .filter { font-size: 0.8rem; padding: 8px 6px; }
+        .task-list { padding: 0 12px; }
+        .task-item { gap: 12px; padding: 12px 14px; }
+        .task-item__delete { opacity: 1; }
+        .app__footer { padding: 14px 16px; flex-wrap: wrap; }
+      }
+
+      @media (max-width: 380px) {
+        .task-form { flex-direction: column; }
+        .task-form__btn { width: 100%; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <header class="app__header">
+        <div class="app__brand">
+          <span class="app__logo" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 11l3 3L22 4" />
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+            </svg>
+          </span>
+          <div>
+            <h1 class="app__title">Task Manager</h1>
+            <p class="app__subtitle" id="activeCount">0 активных задач</p>
+          </div>
+        </div>
+      </header>
+
+      <form class="task-form" id="taskForm" autocomplete="off">
+        <div class="task-form__input-wrap">
+          <svg class="task-form__icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          <input
+            type="text"
+            id="taskInput"
+            class="task-form__input"
+            placeholder="Что нужно сделать?"
+            maxlength="200"
+            aria-label="Новая задача"
+          />
+        </div>
+        <button type="submit" class="task-form__btn">Добавить</button>
+      </form>
+
+      <section class="filters" id="filters" aria-label="Фильтры задач">
+        <button type="button" class="filter is-active" data-filter="all">Все</button>
+        <button type="button" class="filter" data-filter="active">Активные</button>
+        <button type="button" class="filter" data-filter="completed">Выполненные</button>
+      </section>
+
+      <ul class="task-list" id="taskList" aria-live="polite"></ul>
+
+      <div class="empty-state" id="emptyState" hidden>
+        <span class="empty-state__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 11l3 3L22 4" />
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+          </svg>
+        </span>
+        <p class="empty-state__text">Список пуст</p>
+      </div>
+
+      <footer class="app__footer" id="appFooter" hidden>
+        <span class="app__footer-count" id="footerCount"></span>
+        <button type="button" class="app__clear-btn" id="clearCompleted">Очистить выполненные</button>
+      </footer>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <script>
+      (function () {
+        var STORAGE_KEY = 'task-manager:tasks';
+        var FILTER_KEY  = 'task-manager:filter';
+
+        var state = { tasks: [], filter: 'all' };
+
+        var els = {
+          form:       document.getElementById('taskForm'),
+          input:      document.getElementById('taskInput'),
+          list:       document.getElementById('taskList'),
+          emptyState: document.getElementById('emptyState'),
+          activeCount:document.getElementById('activeCount'),
+          footer:     document.getElementById('appFooter'),
+          footerCount:document.getElementById('footerCount'),
+          clearBtn:   document.getElementById('clearCompleted'),
+          filters:    document.getElementById('filters'),
+          toast:      document.getElementById('toast'),
+        };
+
+        function loadTasks() {
+          try { state.tasks = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+          catch (e) { state.tasks = []; }
+        }
+
+        function saveTasks() {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state.tasks));
+        }
+
+        function loadFilter() {
+          state.filter = localStorage.getItem(FILTER_KEY) || 'all';
+        }
+
+        function saveFilter() {
+          localStorage.setItem(FILTER_KEY, state.filter);
+        }
+
+        function getFiltered() {
+          if (state.filter === 'active')    return state.tasks.filter(function(t){ return !t.done; });
+          if (state.filter === 'completed') return state.tasks.filter(function(t){ return  t.done; });
+          return state.tasks;
+        }
+
+        function pluralize(n, forms) {
+          var m10 = n % 10, m100 = n % 100;
+          if (m10 === 1 && m100 !== 11) return forms[0];
+          if (m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20)) return forms[1];
+          return forms[2];
+        }
+
+        function escapeHtml(str) {
+          var d = document.createElement('div');
+          d.textContent = str;
+          return d.innerHTML;
+        }
+
+        var toastTimer;
+        function showToast(msg) {
+          els.toast.textContent = msg;
+          els.toast.hidden = false;
+          requestAnimationFrame(function(){ els.toast.classList.add('is-visible'); });
+          clearTimeout(toastTimer);
+          toastTimer = setTimeout(function(){
+            els.toast.classList.remove('is-visible');
+            setTimeout(function(){ els.toast.hidden = true; }, 200);
+          }, 2200);
+        }
+
+        function render() {
+          var filtered = getFiltered();
+          els.list.innerHTML = '';
+          filtered.forEach(function(task){ els.list.appendChild(createTaskEl(task)); });
+
+          var active    = state.tasks.filter(function(t){ return !t.done; }).length;
+          var completed = state.tasks.length - active;
+
+          els.activeCount.textContent = active + ' ' + pluralize(active, ['активная задача','активные задачи','активных задач']);
+
+          var showEmpty = filtered.length === 0;
+          els.emptyState.hidden = !showEmpty;
+          if (showEmpty) {
+            var msg = state.filter === 'completed' ? 'Нет выполненных задач'
+                    : state.filter === 'active'    ? 'Нет активных задач'
+                    : 'Список пуст';
+            els.emptyState.querySelector('.empty-state__text').textContent = msg;
+          }
+
+          var hasAny = state.tasks.length > 0;
+          els.footer.hidden = !hasAny;
+          if (hasAny) {
+            els.footerCount.textContent = active + ' осталось, ' + completed + ' выполнено';
+            els.clearBtn.disabled = completed === 0;
+          }
+        }
+
+        function createTaskEl(task) {
+          var li = document.createElement('li');
+          li.className = 'task-item' + (task.done ? ' is-completed' : '');
+          li.dataset.id = task.id;
+          li.innerHTML =
+            '<label class="task-item__checkbox">' +
+              '<input type="checkbox" ' + (task.done ? 'checked' : '') + ' aria-label="Отметить выполненной" />' +
+              '<span class="task-item__checkmark">' +
+                '<svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7" /></svg>' +
+              '</span>' +
+            '</label>' +
+            '<span class="task-item__text">' + escapeHtml(task.text) + '</span>' +
+            '<button type="button" class="task-item__delete" aria-label="Удалить задачу">' +
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+                '<path d="M3 6h18M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />' +
+              '</svg>' +
+            '</button>';
+
+          li.querySelector('input[type="checkbox"]').addEventListener('change', function(e){
+            toggleTask(task.id, e.target.checked);
+          });
+          li.querySelector('.task-item__delete').addEventListener('click', function(){
+            removeTask(task.id, li);
+          });
+          return li;
+        }
+
+        function addTask(text) {
+          var trimmed = text.trim();
+          if (!trimmed) return;
+          state.tasks.unshift({ id: Date.now() + Math.random().toString(36).slice(2, 8), text: trimmed, done: false });
+          saveTasks();
+          render();
+          showToast('Задача добавлена');
+        }
+
+        function toggleTask(id, done) {
+          var task = state.tasks.find(function(t){ return t.id === id; });
+          if (!task) return;
+          task.done = done;
+          saveTasks();
+          render();
+        }
+
+        function removeTask(id, el) {
+          el.classList.add('is-removing');
+          el.addEventListener('animationend', function(){
+            state.tasks = state.tasks.filter(function(t){ return t.id !== id; });
+            saveTasks();
+            render();
+          }, { once: true });
+        }
+
+        function clearCompleted() {
+          var count = state.tasks.filter(function(t){ return t.done; }).length;
+          if (count === 0) return;
+          var completedEls = Array.prototype.slice.call(els.list.querySelectorAll('.task-item.is-completed'));
+          completedEls.forEach(function(el){ el.classList.add('is-removing'); });
+          var finish = function(){
+            state.tasks = state.tasks.filter(function(t){ return !t.done; });
+            saveTasks();
+            render();
+            showToast('Удалено выполненных: ' + count);
+          };
+          if (completedEls.length === 0) { finish(); return; }
+          completedEls[completedEls.length - 1].addEventListener('animationend', finish, { once: true });
+        }
+
+        function setFilter(filter) {
+          state.filter = filter;
+          saveFilter();
+          Array.prototype.forEach.call(els.filters.querySelectorAll('.filter'), function(btn){
+            btn.classList.toggle('is-active', btn.dataset.filter === filter);
+          });
+          render();
+        }
+
+        function init() {
+          loadTasks();
+          loadFilter();
+          setFilter(state.filter);
+
+          els.form.addEventListener('submit', function(e){
+            e.preventDefault();
+            addTask(els.input.value);
+            els.input.value = '';
+            els.input.focus();
+          });
+
+          els.filters.addEventListener('click', function(e){
+            var btn = e.target.closest('.filter');
+            if (btn) setFilter(btn.dataset.filter);
+          });
+
+          els.clearBtn.addEventListener('click', clearCompleted);
+        }
+
+        init();
+      })();
+    </script>
+  </body>
+</html>
