@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Современный минималистичный менеджер задач" />
+  <title>Task Manager</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="app__header">
+      <h1 class="app__title">Мои задачи</h1>
+      <p class="app__subtitle" id="dateLabel"></p>
+    </header>
+
+    <form class="task-form" id="taskForm" autocomplete="off">
+      <input
+        type="text"
+        class="task-form__input"
+        id="taskInput"
+        placeholder="Что нужно сделать?"
+        aria-label="Новая задача"
+        maxlength="120"
+      />
+      <button type="submit" class="task-form__btn" aria-label="Добавить задачу">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+      </button>
+    </form>
+
+    <nav class="filters" id="filters" aria-label="Фильтры задач">
+      <button class="filters__btn is-active" data-filter="all">Все</button>
+      <button class="filters__btn" data-filter="active">Активные</button>
+      <button class="filters__btn" data-filter="completed">Выполненные</button>
+    </nav>
+
+    <ul class="task-list" id="taskList" aria-live="polite"></ul>
+
+    <div class="empty-state" id="emptyState" hidden>
+      <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 11l3 3L22 4" />
+        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+      </svg>
+      <p>Список пуст. Добавьте первую задачу!</p>
+    </div>
+
+    <footer class="app__footer">
+      <span class="counter" id="counter">0 активных задач</span>
+      <button class="clear-btn" id="clearCompleted">Очистить выполненные</button>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
